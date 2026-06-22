@@ -12,8 +12,8 @@ public class PlayerController {
         this.player = player;
     }
 
-    public boolean moveTo(double x, double y, double z) {
-        return player.connection.teleport(x, y, z, player.getYRot(), player.getXRot());
+    public void moveTo(double x, double y, double z) {
+        player.connection.teleport(x, y, z, player.getYRot(), player.getXRot());
     }
 
     public void lookAt(double x, double y, double z) {

@@ -53,11 +53,11 @@ public class MessageHandler {
         var controller = new PlayerController(players.getFirst());
         return switch (type) {
             case "player.move_to" -> {
-                boolean ok = controller.moveTo(
+                controller.moveTo(
                     msg.get("x").getAsDouble(),
                     msg.get("y").getAsDouble(),
                     msg.get("z").getAsDouble());
-                yield ok ? ok("moved") : error("move_failed");
+                yield ok("moved");
             }
             case "player.look_at" -> {
                 controller.lookAt(
