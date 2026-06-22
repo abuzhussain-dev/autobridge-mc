@@ -182,11 +182,32 @@ commands/
 Communication via shared state (`globalThis.bridge = {...}`) + event bus.
 All Java interop via `Java.type()` at runtime.
 
+## Merged File Structure
+```
+autobridge.js             # Single merged file (~794 lines)
+├── Java imports          # ServerSocket, Client, Files, etc.
+├── WebSocket server      # Manual WS handshake, frame encode/decode, ping/pong
+│   ├── handleConnection  # Per-connection thread: handshake → frame loop
+│   ├── add/remove        # Connection pool management (max 10)
+│   └── API               # start, stop, broadcast, send, onMessage, onDisconnect
+├── Command handlers      # 15 handlers registered via __bridge.commands
+│   ├── movement          # move, look, jump, sprint, sneak
+│   ├── combat            # attack, use
+│   ├── world             # getBlock, raycast, getPosition, getTime
+│   ├── inventory         # getInventory, getItem, moveItem
+│   └── chat              # sendChat
+└── Lifecycle             # Config, auth, rate limit, message routing, shutdown hook
+    ├── loadConfig        # Reads config/autobridge/config.json
+    ├── _handleMessage    # JSON-RPC parser with auth check + rate limiter
+    ├── startBridge       # Binds WS + routes messages to handlers
+    └── stopBridge        # Graceful shutdown on unload
+```
+
 ## Current Status
 Last updated: 2026-06-22
 
-- [x] Phase 0: Cleanup (local files deleted, repos pending)
-- [ ] Phase 1: Core WebSocket bridge (building next)
-- [ ] Phase 2: Event system
-- [ ] Phase 3: Security & polish
+- [x] Phase 0: Cleanup (local files deleted)
+- [x] Phase 1: Core WebSocket bridge (built + merged + pushed to GitHub)
+- [ ] Phase 2: Event system (position, health, chat, inventory events)
+- [ ] Phase 3: Security & polish (API key auth, rate limiting already in Phase 1)
 - [ ] Phase 4: Documentation & deployment
