@@ -4,14 +4,4 @@ pluginManagement {
     mavenCentral()
     gradlePluginPortal()
   }
-  plugins {
-    id("fabric-loom") version providers.gradleProperty("loom_version").get()
-  }
-  resolutionStrategy {
-    eachPlugin {
-      if (requested.id.id == 'fabric-loom') {
-        useModule("net.fabricmc:fabric-loom:${requested.version}")
-      }
-    }
-  }
 }
