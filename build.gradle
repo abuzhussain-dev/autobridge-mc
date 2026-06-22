@@ -1,13 +1,23 @@
-plugins {
-  id 'fabric-loom' version '1.15'
-  id 'maven-publish'
+buildscript {
+  repositories {
+    maven { url = 'https://maven.fabricmc.net/' }
+  }
+  dependencies {
+    classpath 'net.fabricmc:fabric-loom:1.15'
+  }
 }
+
+apply plugin: 'fabric-loom'
+apply plugin: 'maven-publish'
+
 version = project.mod_version
 group = project.maven_group
 base { archivesName = project.archives_base_name }
+
 repositories {
   mavenCentral()
 }
+
 dependencies {
   minecraft "com.mojang:minecraft:${project.minecraft_version}"
   mappings loom.officialMojangMappings()
@@ -16,14 +26,18 @@ dependencies {
   implementation 'org.java-websocket:Java-WebSocket:1.5.7'
   include 'org.java-websocket:Java-WebSocket:1.5.7'
 }
+
 processResources {
   inputs.property "version", project.version
   filesMatching("fabric.mod.json") { expand "version": project.version }
 }
+
 tasks.withType(JavaCompile).configureEach { it.options.release = 21 }
+
 java {
   withSourcesJar()
   sourceCompatibility = JavaVersion.VERSION_21
   targetCompatibility = JavaVersion.VERSION_21
 }
+
 jar { from("LICENSE") {} }
