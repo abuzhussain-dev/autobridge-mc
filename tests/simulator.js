@@ -147,9 +147,11 @@ Java._types['java.io.OutputStream'] = function() {};
 Java._types['java.io.OutputStream'].prototype.write = function() {};
 Java._types['java.io.OutputStream'].prototype.flush = function() {};
 
-Java._types['java.lang.Thread'] = function(fn) { this._fn = fn; this._d = false; };
-Java._types['java.lang.Thread'].prototype.setDaemon = function(v) { this._d = v; };
-Java._types['java.lang.Thread'].prototype.start = function() {};
+var ThreadCtor = function(fn) { this._fn = fn; this._d = false; };
+ThreadCtor.sleep = function(ms) {};
+ThreadCtor.prototype.setDaemon = function(v) { this._d = v; };
+ThreadCtor.prototype.start = function() {};
+Java._types['java.lang.Thread'] = ThreadCtor;
 
 Java._types['java.lang.System'] = { out: { println: function(msg) { console.log(msg); } } };
 Java._types['java.lang.Runtime'] = { getRuntime: function() { return { addShutdownHook: function() {} }; } };
