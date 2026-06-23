@@ -184,7 +184,7 @@ All Java interop via `Java.type()` at runtime.
 
 ## Merged File Structure
 ```
-autobridge.js             # Single merged file (~794 lines)
+autobridge.js             # Single merged file (~899 lines)
 ├── Java imports          # ServerSocket, Client, Files, etc.
 ├── WebSocket server      # Manual WS handshake, frame encode/decode, ping/pong
 │   ├── handleConnection  # Per-connection thread: handshake → frame loop
@@ -207,7 +207,7 @@ autobridge.js             # Single merged file (~794 lines)
 Last updated: 2026-06-22
 
 - [x] Phase 0: Cleanup (local files deleted)
-- [x] Phase 1: Core WebSocket bridge (built + merged + pushed to GitHub)
-- [ ] Phase 2: Event system (position, health, chat, inventory events)
+- [x] Phase 1: Core WebSocket bridge (merged + pushed to GitHub)
+- [x] Phase 2: Event system (position/health/death events, subscribe command, simulator 39/39 tests PASS)
 - [ ] Phase 3: Security & polish (API key auth, rate limiting already in Phase 1)
 - [ ] Phase 4: Documentation & deployment
