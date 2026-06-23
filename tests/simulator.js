@@ -154,6 +154,28 @@ Java._types['java.lang.Thread'].prototype.start = function() {};
 Java._types['java.lang.System'] = { out: { println: function(msg) { console.log(msg); } } };
 Java._types['java.lang.Runtime'] = { getRuntime: function() { return { addShutdownHook: function() {} }; } };
 
+Java._types['java.util.Timer'] = function(name, daemon) {
+  this._tasks = [];
+  var self = this;
+  // Bypass: immediately run any scheduled task (sync simulation)
+  this.schedule = function(task, delay, period) {
+    self._tasks.push({ task: task, period: period });
+    try { task.run(); } catch (e) { /* ignore */ }
+  };
+  this.cancel = function() { self._tasks = []; };
+};
+Java._types['java.util.TimerTask'] = function() {};
+Java._types['java.util.TimerTask'].prototype.run = function() {};
+
+Java.extend = function(baseClass, methods) {
+  function Extended() { baseClass.call(this); }
+  Extended.prototype = Object.create(baseClass.prototype);
+  for (var k in methods) {
+    if (methods.hasOwnProperty(k)) Extended.prototype[k] = methods[k];
+  }
+  return Extended;
+};
+
 Java._types['java.nio.file.Paths'] = {
   get: function(path) {
     return {
@@ -344,7 +366,11 @@ Java._types['net.minecraft.client.MinecraftClient$InteractionManager'].prototype
   _lastInteractItem = { player: p, world: w, hand: h };
 };
 
-Java._types['net.minecraft.client.MinecraftClient'] = function() { this.player = null; this.world = null; this.interactionManager = null; };
+Java._types['net.minecraft.client.MinecraftClient'] = function() {
+  this.player = null; this.world = null; this.interactionManager = null;
+  this.runDirectory = { toPath: function() { return { resolve: function(p) { return { toString: function() { return '/mock-dir/' + p; }, toAbsolutePath: function() { return { toString: function() { return '/' + p; } }; }, getParent: function() { return { toString: function() { return '/config'; } }; } }; } }; } };
+};
+Java._types['net.minecraft.client.MinecraftClient'].prototype.execute = function(fn) { fn(); };
 Java._types['net.minecraft.client.MinecraftClient'].getInstance = function() {
   if (!Java._types['net.minecraft.client.MinecraftClient']._inst)
     Java._types['net.minecraft.client.MinecraftClient']._inst = new Java._types['net.minecraft.client.MinecraftClient']();

@@ -208,6 +208,20 @@ Last updated: 2026-06-22
 
 - [x] Phase 0: Cleanup (local files deleted)
 - [x] Phase 1: Core WebSocket bridge (merged + pushed to GitHub)
-- [x] Phase 2: Event system (position/health/death events, subscribe command, simulator 39/39 tests PASS)
-- [ ] Phase 3: Security & polish (API key auth, rate limiting already in Phase 1)
-- [ ] Phase 4: Documentation & deployment
+- [x] Phase 2: Event system (position/health/death events, subscribe command)
+- [x] Phase 3: Security & polish (API key auth, rate limiting, config hot-reload, status command)
+- [x] Phase 4: Documentation & deployment (README, config example, Python + JS clients)
+
+## Repo Status
+```
+https://github.com/abuzhussain-dev/autobridge-mc
+├── autobridge.js              # 941 lines — WebSocket server + 17 commands + events + auth
+├── README.md                  # Full documentation
+├── config.json.example        # Default config template
+├── tests/
+│   └── simulator.js           # 39 mock MC tests (no Minecraft needed)
+├── examples/
+│   ├── client.py              # Python asyncio client
+│   └── client.js              # Node.js WebSocket client
+└── PROJECT.md                 # This file
+```

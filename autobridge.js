@@ -18,10 +18,45 @@ var Files = Java.type('java.nio.file.Files');
 var StandardCharsets = Java.type('java.nio.charset.StandardCharsets');
 var Client = Java.type('net.minecraft.client.MinecraftClient').getInstance();
 
+var _cmdQueue = [];
+var _cmdQueueRunning = false;
+
+function _queueCommand(connId, id, type, handler, payload) {
+  _cmdQueue.push({connId: connId, id: id, type: type, handler: handler, payload: payload});
+  _drainQueue();
+}
+
+function _drainQueue() {
+  if (_cmdQueueRunning || _cmdQueue.length === 0) return;
+  _cmdQueueRunning = true;
+  Java.type('net.minecraft.client.MinecraftClient').getInstance().execute(function() {
+    try {
+      while (_cmdQueue.length > 0) {
+        var cmd = _cmdQueue.shift();
+        try {
+          var _cmdStart = Date.now();
+          globalThis.__bridge._currentConnId = cmd.connId;
+          var result = cmd.handler(cmd.payload);
+          globalThis.__bridge._currentConnId = null;
+          var _cmdElapsed = Date.now() - _cmdStart;
+          if (_cmdElapsed > 1000) log(LOG.WARN, "Slow command " + cmd.type + " took " + _cmdElapsed + "ms");
+          _sendResponse(cmd.connId, { id: cmd.id, type: cmd.type, result: result });
+        } catch (e) {
+          _sendResponse(cmd.connId, { id: cmd.id, type: 'error', error: { code: -32603, message: 'Handler error: ' + (e.message || e) } });
+        }
+      }
+    } finally {
+      _cmdQueueRunning = false;
+    }
+  });
+}
+
 function setInterval(fn, ms) {
-  var timer = new Java.type('java.util.Timer')('autobridge-event-timer', true);
-  var task = Java.type('java.util.TimerTask')({ run: fn });
-  timer.schedule(task, ms, ms);
+  var Timer = Java.type('java.util.Timer');
+  var TimerTask = Java.type('java.util.TimerTask');
+  var timer = new Timer('autobridge-event-timer', true);
+  var task = Java.extend(TimerTask, { run: fn });
+  timer.schedule(new task(), ms, ms);
   return timer;
 }
 function clearInterval(timer) {
@@ -699,7 +734,8 @@ var _config = {
 
 function loadConfig() {
   try {
-    var configPath = Paths.get('config/autobridge/config.json');
+    var mc = Java.type('net.minecraft.client.MinecraftClient').getInstance();
+    var configPath = mc.runDirectory.toPath().resolve('config/autobridge/config.json');
     if (Files.exists(configPath)) {
       var bytes = Files.readAllBytes(configPath);
       var content = String(bytes, StandardCharsets.UTF_8);
@@ -797,17 +833,7 @@ function _handleMessage(connId, raw) {
     _sendResponse(connId, { id: msg.id || null, type: 'error', error: { code: -32601, message: 'Method not found: ' + msg.type } });
     return;
   }
-  try {
-    var _cmdStart = Date.now();
-    globalThis.__bridge._currentConnId = connId;
-    var result = handler(msg.payload || {});
-    globalThis.__bridge._currentConnId = null;
-    var _cmdElapsed = Date.now() - _cmdStart;
-    if (_cmdElapsed > 1000) log(LOG.WARN, "Slow command " + msg.type + " took " + _cmdElapsed + "ms");
-    _sendResponse(connId, { id: msg.id, type: msg.type, result: result });
-  } catch (e) {
-    _sendResponse(connId, { id: msg.id, type: 'error', error: { code: -32603, message: 'Handler error: ' + (e.message || e) } });
-  }
+  _queueCommand(connId, msg.id, msg.type, handler, msg.payload || {});
 }
 
 function _eventTick() {
@@ -893,7 +919,10 @@ function startBridge() {
       delete _connectTime[connId];
     };
     if (_eventInterval === null) {
-      _eventInterval = setInterval(_eventTick, 50);
+      var mc = Java.type('net.minecraft.client.MinecraftClient').getInstance();
+      _eventInterval = setInterval(function() {
+        try { mc.execute(function() { _eventTick(); }); } catch (e) {}
+      }, 50);
     }
     log(LOG.INFO, "Bridge started on " + _config.host + ":" + _config.port);
   } catch (e) {
