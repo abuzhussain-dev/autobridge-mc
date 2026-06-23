@@ -33,6 +33,8 @@ var _lastHealth = {health: 20, food: 20, saturation: 5};
 var _lastPos = null;
 var _eventSubscriptions = new ConcurrentHashMap();
 var _eventInterval = null;
+var _startTime = null;
+var _lastChat = [];
 
 var WS_MAGIC = '258EAFA5-E914-47DA-95CA-5AB5DC11B75B';
 var MAX_CONNECTIONS = 10;
@@ -646,6 +648,35 @@ globalThis.__bridge.commands.register({
     } catch (e) {
       return {success: false, error: e.message};
     }
+  },
+
+  reload: function(payload) {
+    try {
+      loadConfig();
+      return {success: true, message: "Config reloaded"};
+    } catch (e) {
+      return {success: false, error: e.message};
+    }
+  },
+
+  status: function(payload) {
+    try {
+      return {
+        success: true,
+        running: globalThis.__bridge.ws.isRunning(),
+        connections: connMap.size(),
+        uptime: Date.now() - (_startTime || Date.now()),
+        config: {
+          host: _config.host,
+          port: _config.port,
+          hasApiKey: !!_config.apiKey,
+          rateLimit: _config.rateLimit,
+          logLevel: _config.logLevel
+        }
+      };
+    } catch (e) {
+      return {success: false, error: e.message};
+    }
   }
 });
 
@@ -834,6 +865,16 @@ function _checkDeath() {
   }
 }
 
+globalThis.onChat = function(chat, event) {
+  try {
+    var msg = typeof chat === 'string' ? chat : (chat.getMessage ? chat.getMessage().getString() : String(chat));
+    _lastChat.push(msg);
+    if (_lastChat.length > 50) _lastChat.shift();
+    globalThis.__bridge.ws.broadcast('event', {event: 'chat', data: {message: msg, sender: 'unknown', timestamp: Date.now()}});
+  } catch (e) {
+  }
+};
+
 function startBridge() {
   if (!globalThis.__bridge || !globalThis.__bridge.ws || !globalThis.__bridge.ws.start || !globalThis.__bridge.commands || !globalThis.__bridge.commands.handlers) {
     log(LOG.ERROR, "Dependencies not loaded — ensure ws-server.js and commands.js are loaded before main.js");
@@ -841,6 +882,7 @@ function startBridge() {
   }
   try {
     loadConfig();
+    _startTime = Date.now();
     globalThis.__bridge.ws.start(_config.host, _config.port);
     globalThis.__bridge.ws.onMessage = function(connId, raw) {
       _handleMessage(connId, raw);
