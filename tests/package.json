@@ -1,0 +1,9 @@
+{
+  "name": "autobridge-tests",
+  "version": "1.0.0",
+  "description": "Simulator and tests for autobridge.js",
+  "private": true,
+  "scripts": {
+    "test": "node simulator.js"
+  }
+}

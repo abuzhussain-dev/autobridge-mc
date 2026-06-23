@@ -18,6 +18,22 @@ var Files = Java.type('java.nio.file.Files');
 var StandardCharsets = Java.type('java.nio.charset.StandardCharsets');
 var Client = Java.type('net.minecraft.client.MinecraftClient').getInstance();
 
+function setInterval(fn, ms) {
+  var timer = new Java.type('java.util.Timer')('autobridge-event-timer', true);
+  var task = Java.type('java.util.TimerTask')({ run: fn });
+  timer.schedule(task, ms, ms);
+  return timer;
+}
+function clearInterval(timer) {
+  if (timer) try { timer.cancel(); } catch(e) {}
+}
+
+var _lastPosBroadcast = 0;
+var _lastHealth = {health: 20, food: 20, saturation: 5};
+var _lastPos = null;
+var _eventSubscriptions = new ConcurrentHashMap();
+var _eventInterval = null;
+
 var WS_MAGIC = '258EAFA5-E914-47DA-95CA-5AB5DC11B75B';
 var MAX_CONNECTIONS = 10;
 var MAX_FRAME_SIZE = 16 * 1024 * 1024;
@@ -74,20 +90,20 @@ function buildControlFrame(opcode) {
   return baos.toByteArray();
 }
 
-function readFrameInfo(in) {
-  var b = in.read();
+function readFrameInfo(inputStream) {
+  var b = inputStream.read();
   if (b < 0) return null;
   var masked = (b & 0x80) !== 0;
   var len = b & 0x7F;
   if (len === 126) {
-    var hi = in.read();
-    var lo = in.read();
+    var hi = inputStream.read();
+    var lo = inputStream.read();
     if (hi < 0 || lo < 0) return null;
     len = (hi << 8) | lo;
   } else if (len === 127) {
     len = 0;
     for (var i = 0; i < 8; i++) {
-      var c = in.read();
+      var c = inputStream.read();
       if (c < 0) return null;
       len = (len << 8) | c;
     }
@@ -616,6 +632,20 @@ globalThis.__bridge.commands.register({
     } catch (e) {
       return { success: false, error: e.message };
     }
+  },
+
+  subscribe: function(payload) {
+    try {
+      var events = payload.events || [];
+      if (!Array.isArray(events)) return {success: false, error: "events must be an array"};
+      var connId = globalThis.__bridge._currentConnId;
+      if (connId) {
+        _eventSubscriptions.put(connId, events);
+      }
+      return {success: true, subscribed: events};
+    } catch (e) {
+      return {success: false, error: e.message};
+    }
   }
 });
 
@@ -738,12 +768,69 @@ function _handleMessage(connId, raw) {
   }
   try {
     var _cmdStart = Date.now();
+    globalThis.__bridge._currentConnId = connId;
     var result = handler(msg.payload || {});
+    globalThis.__bridge._currentConnId = null;
     var _cmdElapsed = Date.now() - _cmdStart;
     if (_cmdElapsed > 1000) log(LOG.WARN, "Slow command " + msg.type + " took " + _cmdElapsed + "ms");
     _sendResponse(connId, { id: msg.id, type: msg.type, result: result });
   } catch (e) {
     _sendResponse(connId, { id: msg.id, type: 'error', error: { code: -32603, message: 'Handler error: ' + (e.message || e) } });
+  }
+}
+
+function _eventTick() {
+  try {
+    if (!Client.player || !Client.world) return;
+    _checkPosition();
+    _checkDeath();
+    _checkHealth();
+  } catch (e) {
+  }
+}
+
+function _checkPosition() {
+  try {
+    var now = Date.now();
+    if (now - _lastPosBroadcast < 200) return;
+    var pos = Client.player.getPos();
+    var x = pos.x;
+    var y = pos.y;
+    var z = pos.z;
+    var yaw = Client.player.getYaw();
+    var pitch = Client.player.getPitch();
+    var onGround = Client.player.isOnGround();
+    var dimension = Client.world.getRegistryKey().getValue().toString();
+    if (_lastPos === null || x !== _lastPos.x || y !== _lastPos.y || z !== _lastPos.z || yaw !== _lastPos.yaw || pitch !== _lastPos.pitch || onGround !== _lastPos.onGround || dimension !== _lastPos.dimension) {
+      _lastPos = {x: x, y: y, z: z, yaw: yaw, pitch: pitch, onGround: onGround, dimension: dimension};
+      _lastPosBroadcast = now;
+      globalThis.__bridge.ws.broadcast('event', {event: 'position', data: {x: x, y: y, z: z, yaw: yaw, pitch: pitch, onGround: onGround, dimension: dimension}});
+    }
+  } catch (e) {
+  }
+}
+
+function _checkHealth() {
+  try {
+    var health = Client.player.getHealth();
+    var maxHealth = Client.player.getMaxHealth();
+    var food = Client.player.getHungerManager().getFoodLevel();
+    var saturation = Client.player.getHungerManager().getSaturationLevel();
+    if (health !== _lastHealth.health || food !== _lastHealth.food || saturation !== _lastHealth.saturation) {
+      _lastHealth = {health: health, food: food, saturation: saturation};
+      globalThis.__bridge.ws.broadcast('event', {event: 'health', data: {health: health, maxHealth: maxHealth, food: food, saturation: saturation}});
+    }
+  } catch (e) {
+  }
+}
+
+function _checkDeath() {
+  try {
+    var health = Client.player.getHealth();
+    if (_lastHealth.health > 0 && health <= 0) {
+      globalThis.__bridge.ws.broadcast('event', {event: 'death', data: {message: 'Player died', source: 'unknown'}});
+    }
+  } catch (e) {
   }
 }
 
@@ -763,6 +850,9 @@ function startBridge() {
       delete _lastCmdTime[connId];
       delete _connectTime[connId];
     };
+    if (_eventInterval === null) {
+      _eventInterval = setInterval(_eventTick, 50);
+    }
     log(LOG.INFO, "Bridge started on " + _config.host + ":" + _config.port);
   } catch (e) {
     log(LOG.ERROR, "Failed to start bridge: " + (e.message || e));
@@ -771,6 +861,10 @@ function startBridge() {
 
 function stopBridge() {
   try {
+    if (_eventInterval !== null) {
+      clearInterval(_eventInterval);
+      _eventInterval = null;
+    }
     globalThis.__bridge.ws.stop();
     _authMap.clear();
     log(LOG.INFO, "Bridge stopped");
@@ -781,6 +875,8 @@ function stopBridge() {
 
 globalThis.__bridge.start = startBridge;
 globalThis.__bridge.stop = stopBridge;
+globalThis.__bridge._config = _config;
+globalThis.__bridge._authMap = _authMap;
 
 try {
   startBridge();
