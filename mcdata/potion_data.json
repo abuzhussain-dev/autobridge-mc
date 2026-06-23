@@ -1,0 +1,132 @@
+{
+  "ingredients": {
+    "nether_wart": {
+      "id": 1119,
+      "name": "nether_wart",
+      "displayName": "Nether Wart",
+      "stackSize": 64
+    },
+    "redstone": {
+      "id": 717,
+      "name": "redstone",
+      "displayName": "Redstone Dust",
+      "stackSize": 64
+    },
+    "glowstone_dust": {
+      "id": 1056,
+      "name": "glowstone_dust",
+      "displayName": "Glowstone Dust",
+      "stackSize": 64
+    },
+    "gunpowder": {
+      "id": 950,
+      "name": "gunpowder",
+      "displayName": "Gunpowder",
+      "stackSize": 64
+    },
+    "dragon_breath": {
+      "id": 1290,
+      "name": "dragon_breath",
+      "displayName": "Dragon's Breath",
+      "stackSize": 64
+    },
+    "fermented_spider_eye": {
+      "id": 1123,
+      "name": "fermented_spider_eye",
+      "displayName": "Fermented Spider Eye",
+      "stackSize": 64
+    },
+    "blaze_powder": {
+      "id": 1124,
+      "name": "blaze_powder",
+      "displayName": "Blaze Powder",
+      "stackSize": 64
+    },
+    "ghast_tear": {
+      "id": 1117,
+      "name": "ghast_tear",
+      "displayName": "Ghast Tear",
+      "stackSize": 64
+    },
+    "spider_eye": {
+      "id": 1122,
+      "name": "spider_eye",
+      "displayName": "Spider Eye",
+      "stackSize": 64
+    },
+    "sugar": {
+      "id": 1084,
+      "name": "sugar",
+      "displayName": "Sugar",
+      "stackSize": 64
+    },
+    "rabbit_foot": {
+      "id": 1252,
+      "name": "rabbit_foot",
+      "displayName": "Rabbit's Foot",
+      "stackSize": 64
+    },
+    "magma_cream": {
+      "id": 1125,
+      "name": "magma_cream",
+      "displayName": "Magma Cream",
+      "stackSize": 64
+    },
+    "glistering_melon_slice": {
+      "id": 1129,
+      "name": "glistering_melon_slice",
+      "displayName": "Glistering Melon Slice",
+      "stackSize": 64
+    },
+    "golden_carrot": {
+      "id": 1232,
+      "name": "golden_carrot",
+      "displayName": "Golden Carrot",
+      "stackSize": 64
+    },
+    "pufferfish": {
+      "id": 1060,
+      "name": "pufferfish",
+      "displayName": "Pufferfish",
+      "stackSize": 64
+    },
+    "turtle_helmet": {
+      "id": 887,
+      "name": "turtle_helmet",
+      "displayName": "Turtle Shell",
+      "stackSize": 1
+    },
+    "phantom_membrane": {
+      "id": 861,
+      "name": "phantom_membrane",
+      "displayName": "Phantom Membrane",
+      "stackSize": 64
+    }
+  },
+  "potions": {
+    "water_bottle": {
+      "id": -1,
+      "name": "water_bottle",
+      "displayName": "Water Bottle",
+      "stackSize": 1
+    },
+    "potion": {
+      "id": 1121,
+      "name": "potion",
+      "displayName": "Potion",
+      "stackSize": 1
+    },
+    "splash_potion": {
+      "id": 1291,
+      "name": "splash_potion",
+      "displayName": "Splash Potion",
+      "stackSize": 1
+    },
+    "lingering_potion": {
+      "id": 1294,
+      "name": "lingering_potion",
+      "displayName": "Lingering Potion",
+      "stackSize": 1
+    }
+  }
+}

@@ -1,0 +1,836 @@
+{
+  "version": "1.21.11",
+  "totalItems": 1505,
+  "totalBlocks": 1166,
+  "totalRecipes": 886,
+  "brewingStand": {
+    "slotCount": 5,
+    "fuelSlot": 0,
+    "ingredientSlot": 4,
+    "potionSlots": [
+      1,
+      2,
+      3
+    ]
+  },
+  "brewingIngredients": {
+    "nether_wart": {
+      "type": "base",
+      "effect": "Awkward base potion",
+      "source": "Nether Fortress"
+    },
+    "redstone": {
+      "type": "modifier",
+      "effect": "Extends duration",
+      "maxLevel": 3
+    },
+    "glowstone_dust": {
+      "type": "modifier",
+      "effect": "Increases potency",
+      "maxLevel": 2
+    },
+    "gunpowder": {
+      "type": "modifier",
+      "effect": "Makes splash potion"
+    },
+    "dragon_breath": {
+      "type": "modifier",
+      "effect": "Makes lingering potion"
+    },
+    "fermented_spider_eye": {
+      "type": "modifier",
+      "effect": "Corrupts/Inverts potion effect"
+    },
+    "blaze_powder": {
+      "type": "fuel",
+      "effect": "Brewing stand fuel"
+    }
+  },
+  "potionEffects": [
+    {
+      "id": 0,
+      "name": "Speed",
+      "displayName": "Speed",
+      "type": "good"
+    },
+    {
+      "id": 1,
+      "name": "Slowness",
+      "displayName": "Slowness",
+      "type": "bad"
+    },
+    {
+      "id": 2,
+      "name": "Haste",
+      "displayName": "Haste",
+      "type": "good"
+    },
+    {
+      "id": 3,
+      "name": "MiningFatigue",
+      "displayName": "Mining Fatigue",
+      "type": "bad"
+    },
+    {
+      "id": 4,
+      "name": "Strength",
+      "displayName": "Strength",
+      "type": "good"
+    },
+    {
+      "id": 5,
+      "name": "InstantHealth",
+      "displayName": "Instant Health",
+      "type": "good"
+    },
+    {
+      "id": 6,
+      "name": "InstantDamage",
+      "displayName": "Instant Damage",
+      "type": "bad"
+    },
+    {
+      "id": 7,
+      "name": "JumpBoost",
+      "displayName": "Jump Boost",
+      "type": "good"
+    },
+    {
+      "id": 8,
+      "name": "Nausea",
+      "displayName": "Nausea",
+      "type": "bad"
+    },
+    {
+      "id": 9,
+      "name": "Regeneration",
+      "displayName": "Regeneration",
+      "type": "good"
+    },
+    {
+      "id": 10,
+      "name": "Resistance",
+      "displayName": "Resistance",
+      "type": "good"
+    },
+    {
+      "id": 11,
+      "name": "FireResistance",
+      "displayName": "Fire Resistance",
+      "type": "good"
+    },
+    {
+      "id": 12,
+      "name": "WaterBreathing",
+      "displayName": "Water Breathing",
+      "type": "good"
+    },
+    {
+      "id": 13,
+      "name": "Invisibility",
+      "displayName": "Invisibility",
+      "type": "good"
+    },
+    {
+      "id": 14,
+      "name": "Blindness",
+      "displayName": "Blindness",
+      "type": "bad"
+    },
+    {
+      "id": 15,
+      "name": "NightVision",
+      "displayName": "Night Vision",
+      "type": "good"
+    },
+    {
+      "id": 16,
+      "name": "Hunger",
+      "displayName": "Hunger",
+      "type": "bad"
+    },
+    {
+      "id": 17,
+      "name": "Weakness",
+      "displayName": "Weakness",
+      "type": "bad"
+    },
+    {
+      "id": 18,
+      "name": "Poison",
+      "displayName": "Poison",
+      "type": "bad"
+    },
+    {
+      "id": 19,
+      "name": "Wither",
+      "displayName": "Wither",
+      "type": "bad"
+    },
+    {
+      "id": 20,
+      "name": "HealthBoost",
+      "displayName": "Health Boost",
+      "type": "good"
+    },
+    {
+      "id": 21,
+      "name": "Absorption",
+      "displayName": "Absorption",
+      "type": "good"
+    },
+    {
+      "id": 22,
+      "name": "Saturation",
+      "displayName": "Saturation",
+      "type": "good"
+    },
+    {
+      "id": 23,
+      "name": "Glowing",
+      "displayName": "Glowing",
+      "type": "bad"
+    },
+    {
+      "id": 24,
+      "name": "Levitation",
+      "displayName": "Levitation",
+      "type": "bad"
+    },
+    {
+      "id": 25,
+      "name": "Luck",
+      "displayName": "Luck",
+      "type": "good"
+    },
+    {
+      "id": 26,
+      "name": "BadLuck",
+      "displayName": "Bad Luck",
+      "type": "bad"
+    },
+    {
+      "id": 27,
+      "name": "SlowFalling",
+      "displayName": "Slow Falling",
+      "type": "good"
+    },
+    {
+      "id": 28,
+      "name": "ConduitPower",
+      "displayName": "Conduit Power",
+      "type": "good"
+    },
+    {
+      "id": 29,
+      "name": "DolphinsGrace",
+      "displayName": "Dolphin's Grace",
+      "type": "good"
+    },
+    {
+      "id": 30,
+      "name": "BadOmen",
+      "displayName": "Bad Omen",
+      "type": "bad"
+    },
+    {
+      "id": 31,
+      "name": "HeroOfTheVillage",
+      "displayName": "Hero of the Village",
+      "type": "good"
+    },
+    {
+      "id": 32,
+      "name": "Darkness",
+      "displayName": "Darkness",
+      "type": "bad"
+    },
+    {
+      "id": 33,
+      "name": "TrialOmen",
+      "displayName": "Trial Omen",
+      "type": "bad"
+    },
+    {
+      "id": 34,
+      "name": "RaidOmen",
+      "displayName": "Raid Omen",
+      "type": "bad"
+    },
+    {
+      "id": 35,
+      "name": "WindCharged",
+      "displayName": "Wind Charged",
+      "type": "bad"
+    },
+    {
+      "id": 36,
+      "name": "Weaving",
+      "displayName": "Weaving",
+      "type": "bad"
+    },
+    {
+      "id": 37,
+      "name": "Oozing",
+      "displayName": "Oozing",
+      "type": "bad"
+    },
+    {
+      "id": 38,
+      "name": "Infested",
+      "displayName": "Infested",
+      "type": "bad"
+    },
+    {
+      "id": 39,
+      "name": "BreathOfTheNautilus",
+      "displayName": "Breath of the Nautilus",
+      "type": "good"
+    }
+  ],
+  "potionBrewingTree": {
+    "base": {
+      "ingredient": "nether_wart",
+      "result": "awkward",
+      "from": "water_bottle"
+    },
+    "awkward_to_healing": {
+      "ingredient": "glistering_melon_slice",
+      "result": "healing",
+      "from": "awkward"
+    },
+    "awkward_to_fire_resistance": {
+      "ingredient": "magma_cream",
+      "result": "fire_resistance",
+      "from": "awkward"
+    },
+    "awkward_to_harming": {
+      "ingredient": "fermented_spider_eye",
+      "result": "harming",
+      "from": "awkward"
+    },
+    "awkward_to_leaping": {
+      "ingredient": "rabbit_foot",
+      "result": "leaping",
+      "from": "awkward"
+    },
+    "awkward_to_poison": {
+      "ingredient": "spider_eye",
+      "result": "poison",
+      "from": "awkward"
+    },
+    "awkward_to_regeneration": {
+      "ingredient": "ghast_tear",
+      "result": "regeneration",
+      "from": "awkward"
+    },
+    "awkward_to_slowness": {
+      "ingredient": "fermented_spider_eye",
+      "result": "slowness",
+      "from": "awkward"
+    },
+    "awkward_to_strength": {
+      "ingredient": "blaze_powder",
+      "result": "strength",
+      "from": "awkward"
+    },
+    "awkward_to_swiftness": {
+      "ingredient": "sugar",
+      "result": "swiftness",
+      "from": "awkward"
+    },
+    "awkward_to_turtle_master": {
+      "ingredient": "turtle_helmet",
+      "result": "turtle_master",
+      "from": "awkward"
+    },
+    "awkward_to_water_breathing": {
+      "ingredient": "pufferfish",
+      "result": "water_breathing",
+      "from": "awkward"
+    },
+    "awkward_to_slow_falling": {
+      "ingredient": "phantom_membrane",
+      "result": "slow_falling",
+      "from": "awkward"
+    },
+    "awkward_to_invisibility": {
+      "ingredient": "fermented_spider_eye",
+      "result": "invisibility",
+      "from": "awkward"
+    },
+    "healing_to_harming": {
+      "ingredient": "fermented_spider_eye",
+      "result": "harming_II",
+      "from": "healing"
+    },
+    "poison_to_harming": {
+      "ingredient": "fermented_spider_eye",
+      "result": "harming",
+      "from": "poison"
+    },
+    "leaping_to_slowness": {
+      "ingredient": "fermented_spider_eye",
+      "result": "slowness",
+      "from": "leaping"
+    },
+    "swiftness_to_slowness": {
+      "ingredient": "fermented_spider_eye",
+      "result": "slowness",
+      "from": "swiftness"
+    },
+    "night_vision_to_invisibility": {
+      "ingredient": "fermented_spider_eye",
+      "result": "invisibility",
+      "from": "night_vision"
+    },
+    "strength_to_weakness": {
+      "ingredient": "fermented_spider_eye",
+      "result": "weakness",
+      "from": "strength"
+    },
+    "regeneration_to_poison": {
+      "ingredient": "fermented_spider_eye",
+      "result": "poison",
+      "from": "regeneration"
+    },
+    "water_breathing_to_harming": {
+      "ingredient": "fermented_spider_eye",
+      "result": "harming",
+      "from": "water_breathing"
+    },
+    "turtle_master_to_slowness": {
+      "ingredient": "fermented_spider_eye",
+      "result": "slowness",
+      "from": "turtle_master"
+    },
+    "slow_falling_to_harming": {
+      "ingredient": "fermented_spider_eye",
+      "result": "harming",
+      "from": "slow_falling"
+    }
+  },
+  "potionModifiers": {
+    "redstone_extended": {
+      "ingredient": "redstone",
+      "effect": "Extends duration",
+      "appliesTo": [
+        "healing",
+        "fire_resistance",
+        "leaping",
+        "poison",
+        "regeneration",
+        "strength",
+        "swiftness",
+        "turtle_master",
+        "water_breathing",
+        "slow_falling",
+        "night_vision",
+        "invisibility",
+        "weakness"
+      ]
+    },
+    "glowstone_upgraded": {
+      "ingredient": "glowstone_dust",
+      "effect": "Increases potency",
+      "appliesTo": [
+        "healing",
+        "harming",
+        "leaping",
+        "poison",
+        "regeneration",
+        "strength",
+        "swiftness",
+        "turtle_master",
+        "slowness",
+        "weakness"
+      ]
+    },
+    "gunpowder_splash": {
+      "ingredient": "gunpowder",
+      "effect": "Makes throwable splash potion",
+      "appliesTo": [
+        "all"
+      ]
+    },
+    "dragon_breath_lingering": {
+      "ingredient": "dragon_breath",
+      "effect": "Makes area-effect lingering potion",
+      "appliesTo": [
+        "splash"
+      ]
+    }
+  },
+  "potionEffectsMap": {
+    "healing": {
+      "id": 6,
+      "name": "instant_health",
+      "displayName": "Instant Health"
+    },
+    "fire_resistance": {
+      "id": 12,
+      "name": "fire_resistance",
+      "displayName": "Fire Resistance"
+    },
+    "harming": {
+      "id": 7,
+      "name": "instant_damage",
+      "displayName": "Instant Damage"
+    },
+    "leaping": {
+      "id": 9,
+      "name": "jump_boost",
+      "displayName": "Jump Boost"
+    },
+    "poison": {
+      "id": 19,
+      "name": "poison",
+      "displayName": "Poison"
+    },
+    "regeneration": {
+      "id": 10,
+      "name": "regeneration",
+      "displayName": "Regeneration"
+    },
+    "slowness": {
+      "id": 2,
+      "name": "slowness",
+      "displayName": "Slowness"
+    },
+    "strength": {
+      "id": 5,
+      "name": "strength",
+      "displayName": "Strength"
+    },
+    "swiftness": {
+      "id": 1,
+      "name": "speed",
+      "displayName": "Speed"
+    },
+    "turtle_master": {
+      "id": 25,
+      "name": "slowness",
+      "displayName": "Slowness IV + Resistance III"
+    },
+    "water_breathing": {
+      "id": 13,
+      "name": "water_breathing",
+      "displayName": "Water Breathing"
+    },
+    "slow_falling": {
+      "id": 28,
+      "name": "slow_falling",
+      "displayName": "Slow Falling"
+    },
+    "invisibility": {
+      "id": 14,
+      "name": "invisibility",
+      "displayName": "Invisibility"
+    },
+    "night_vision": {
+      "id": 16,
+      "name": "night_vision",
+      "displayName": "Night Vision"
+    },
+    "weakness": {
+      "id": 18,
+      "name": "weakness",
+      "displayName": "Weakness"
+    }
+  },
+  "food": [
+    {
+      "name": "apple",
+      "foodPoints": 4,
+      "saturation": 19.2
+    },
+    {
+      "name": "mushroom_stew",
+      "foodPoints": 6,
+      "saturation": 86.4
+    },
+    {
+      "name": "bread",
+      "foodPoints": 5,
+      "saturation": 60
+    },
+    {
+      "name": "porkchop",
+      "foodPoints": 3,
+      "saturation": 10.8
+    },
+    {
+      "name": "cooked_porkchop",
+      "foodPoints": 8,
+      "saturation": 204.8
+    },
+    {
+      "name": "golden_apple",
+      "foodPoints": 4,
+      "saturation": 76.8
+    },
+    {
+      "name": "enchanted_golden_apple",
+      "foodPoints": 4,
+      "saturation": 76.8
+    },
+    {
+      "name": "pufferfish_bucket",
+      "foodPoints": 1,
+      "saturation": 0.4
+    },
+    {
+      "name": "salmon_bucket",
+      "foodPoints": 2,
+      "saturation": 1.6
+    },
+    {
+      "name": "cod_bucket",
+      "foodPoints": 2,
+      "saturation": 1.6
+    },
+    {
+      "name": "tropical_fish_bucket",
+      "foodPoints": 1,
+      "saturation": 0.4
+    },
+    {
+      "name": "cod",
+      "foodPoints": 2,
+      "saturation": 1.6
+    },
+    {
+      "name": "salmon",
+      "foodPoints": 2,
+      "saturation": 1.6
+    },
+    {
+      "name": "tropical_fish",
+      "foodPoints": 1,
+      "saturation": 0.4
+    },
+    {
+      "name": "pufferfish",
+      "foodPoints": 1,
+      "saturation": 0.4
+    },
+    {
+      "name": "cooked_cod",
+      "foodPoints": 5,
+      "saturation": 60
+    },
+    {
+      "name": "cooked_salmon",
+      "foodPoints": 6,
+      "saturation": 115.200005
+    },
+    {
+      "name": "cookie",
+      "foodPoints": 2,
+      "saturation": 1.6
+    },
+    {
+      "name": "melon_slice",
+      "foodPoints": 2,
+      "saturation": 4.8
+    },
+    {
+      "name": "dried_kelp",
+      "foodPoints": 1,
+      "saturation": 1.2
+    },
+    {
+      "name": "beef",
+      "foodPoints": 3,
+      "saturation": 10.8
+    },
+    {
+      "name": "cooked_beef",
+      "foodPoints": 8,
+      "saturation": 204.8
+    },
+    {
+      "name": "chicken",
+      "foodPoints": 2,
+      "saturation": 4.8
+    },
+    {
+      "name": "cooked_chicken",
+      "foodPoints": 6,
+      "saturation": 86.4
+    },
+    {
+      "name": "rotten_flesh",
+      "foodPoints": 4,
+      "saturation": 6.4
+    },
+    {
+      "name": "spider_eye",
+      "foodPoints": 2,
+      "saturation": 12.8
+    },
+    {
+      "name": "carrot",
+      "foodPoints": 3,
+      "saturation": 21.6
+    },
+    {
+      "name": "potato",
+      "foodPoints": 1,
+      "saturation": 1.2
+    },
+    {
+      "name": "baked_potato",
+      "foodPoints": 5,
+      "saturation": 60
+    },
+    {
+      "name": "poisonous_potato",
+      "foodPoints": 2,
+      "saturation": 4.8
+    },
+    {
+      "name": "golden_carrot",
+      "foodPoints": 6,
+      "saturation": 172.8
+    },
+    {
+      "name": "pumpkin_pie",
+      "foodPoints": 8,
+      "saturation": 76.8
+    },
+    {
+      "name": "rabbit",
+      "foodPoints": 3,
+      "saturation": 10.8
+    },
+    {
+      "name": "cooked_rabbit",
+      "foodPoints": 5,
+      "saturation": 60
+    },
+    {
+      "name": "rabbit_stew",
+      "foodPoints": 10,
+      "saturation": 240
+    },
+    {
+      "name": "mutton",
+      "foodPoints": 2,
+      "saturation": 4.8
+    },
+    {
+      "name": "cooked_mutton",
+      "foodPoints": 6,
+      "saturation": 115.200005
+    },
+    {
+      "name": "chorus_fruit",
+      "foodPoints": 4,
+      "saturation": 19.2
+    },
+    {
+      "name": "beetroot",
+      "foodPoints": 1,
+      "saturation": 2.4
+    },
+    {
+      "name": "beetroot_soup",
+      "foodPoints": 6,
+      "saturation": 86.4
+    },
+    {
+      "name": "suspicious_stew",
+      "foodPoints": 6,
+      "saturation": 86.4
+    },
+    {
+      "name": "sweet_berries",
+      "foodPoints": 2,
+      "saturation": 1.6
+    },
+    {
+      "name": "glow_berries",
+      "foodPoints": 2,
+      "saturation": 1.6
+    },
+    {
+      "name": "honey_bottle",
+      "foodPoints": 6,
+      "saturation": 14.400001
+    }
+  ],
+  "containers": {
+    "chest": {
+      "type": "single",
+      "slots": 27
+    },
+    "chest_double": {
+      "type": "double",
+      "slots": 54
+    },
+    "barrel": {
+      "slots": 27
+    },
+    "furnace": {
+      "slots": 3,
+      "input": 0,
+      "fuel": 1,
+      "output": 2
+    },
+    "blast_furnace": {
+      "slots": 3,
+      "input": 0,
+      "fuel": 1,
+      "output": 2
+    },
+    "smoker": {
+      "slots": 3,
+      "input": 0,
+      "fuel": 1,
+      "output": 2
+    },
+    "brewing_stand": {
+      "slots": 5,
+      "fuel": 0,
+      "potionSlots": [
+        1,
+        2,
+        3
+      ],
+      "ingredient": 4
+    },
+    "crafting_table": {
+      "slots": 10,
+      "grid": "3x3",
+      "output": 0
+    },
+    "enchanting_table": {
+      "slots": 3,
+      "target": 0,
+      "lapis": 1
+    },
+    "anvil": {
+      "slots": 3,
+      "left": 0,
+      "right": 1,
+      "output": 2
+    },
+    "beacon": {
+      "slots": 1,
+      "payment": 0
+    },
+    "hopper": {
+      "slots": 5
+    },
+    "dispenser": {
+      "slots": 9
+    },
+    "dropper": {
+      "slots": 9
+    },
+    "shulker_box": {
+      "slots": 27
+    }
+  }
+}

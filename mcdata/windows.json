@@ -1,0 +1,157 @@
+{
+  "Player": {
+    "slots": [
+      {
+        "name": "craft result",
+        "index": 0
+      },
+      {
+        "name": "craft grid",
+        "index": 1
+      },
+      {
+        "name": "armor",
+        "index": 5
+      },
+      {
+        "name": "helmet",
+        "index": 5
+      },
+      {
+        "name": "chestplate",
+        "index": 6
+      },
+      {
+        "name": "leggings",
+        "index": 7
+      },
+      {
+        "name": "boots",
+        "index": 8
+      }
+    ]
+  },
+  "Horse": {
+    "slots": [
+      {
+        "name": "saddle",
+        "index": 0
+      },
+      {
+        "name": "armor",
+        "index": 1
+      },
+      {
+        "name": "storage",
+        "index": 2
+      }
+    ]
+  },
+  "Anvil": {
+    "slots": [
+      {
+        "name": "tool",
+        "index": 0
+      },
+      {
+        "name": "combined",
+        "index": 1
+      },
+      {
+        "name": "result",
+        "index": 2
+      }
+    ]
+  },
+  "Beacon": {
+    "slots": [
+      {
+        "name": "input",
+        "index": 0
+      }
+    ]
+  },
+  "Brewing Stand": {
+    "slots": [
+      {
+        "name": "ingredient",
+        "index": 0
+      },
+      {
+        "name": "result",
+        "index": 1
+      }
+    ]
+  },
+  "Chest": {
+    "slots": []
+  },
+  "Container": {
+    "slots": []
+  },
+  "Workbench": {
+    "slots": [
+      {
+        "name": "craft result",
+        "index": 0
+      },
+      {
+        "name": "craft grid",
+        "index": 1
+      }
+    ]
+  },
+  "Dispenser": {
+    "slots": []
+  },
+  "Dropper": {
+    "slots": []
+  },
+  "Enchantment Table": {
+    "slots": [
+      {
+        "name": "enchanted",
+        "index": 0
+      },
+      {
+        "name": "lapis",
+        "index": 1
+      }
+    ]
+  },
+  "Furnace": {
+    "slots": [
+      {
+        "name": "smelted",
+        "index": 0
+      },
+      {
+        "name": "fuel",
+        "index": 1
+      },
+      {
+        "name": "result",
+        "index": 2
+      }
+    ]
+  },
+  "Hopper": {
+    "slots": []
+  },
+  "NPC Trade": {
+    "slots": [
+      {
+        "name": "give 1",
+        "index": 0
+      },
+      {
+        "name": "give 2",
+        "index": 1
+      },
+      {
+        "name": "take",
+        "index": 2
+      }
+    ]
+  }
+}

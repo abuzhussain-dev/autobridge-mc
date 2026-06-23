@@ -245,6 +245,45 @@ Java._types['net.minecraft.util.hit.HitResult'].prototype.getPos = function() { 
 Java._types['net.minecraft.util.math.BlockPos'] = function(x, y, z) { this.x = x; this.y = y; this.z = z; };
 Java._types['net.minecraft.util.math.Vec3d'] = function(x, y, z) { this.x = x; this.y = y; this.z = z; };
 
+Java._types['net.minecraft.util.hit.BlockHitResult'] = function(pos) { this._pos = pos; };
+Java._types['net.minecraft.util.hit.BlockHitResult'].prototype.getPos = function() { return this._pos; };
+
+Java._types['net.minecraft.screen.slot.SlotActionType'] = {
+  PICKUP: 'PICKUP',
+  QUICK_MOVE: 'QUICK_MOVE',
+  SWAP: 'SWAP',
+  CLONE: 'CLONE',
+  THROW: 'THROW',
+  QUICK_CRAFT: 'QUICK_CRAFT',
+  valueOf: function(name) { return name || 'PICKUP'; }
+};
+
+function MockSlot(stack) { this._stack = stack || _createEmptyStack(); }
+MockSlot.prototype.getStack = function() { return this._stack; };
+
+function MockScreenHandler(title, slotStacks) {
+  this._title = title;
+  this.syncId = 1;
+  var slotList = [];
+  for (var i = 0; i < slotStacks.length; i++) {
+    slotList.push(new MockSlot(slotStacks[i]));
+  }
+  this.slots = { size: function() { return slotList.length; }, get: function(i) { return slotList[i]; } };
+}
+MockScreenHandler.prototype.getTitle = function() { return new (Java._types['net.minecraft.text.Text'])(this._title); };
+
+Java._types['net.minecraft.inventory.Inventory'] = function() {};
+Java._types['net.minecraft.inventory.Inventory'].prototype.size = function() { return 0; };
+Java._types['net.minecraft.inventory.Inventory'].prototype.getStack = function(i) { return _createEmptyStack(); };
+Java._types['net.minecraft.inventory.Inventory'].prototype.getBlockState = function() {
+  return new (Java._types['net.minecraft.block.BlockState'])(new (Java._types['net.minecraft.block.Block'])('minecraft.air', 'Air'));
+};
+
+Java._types['net.minecraft.blockentity.BlockEntity'] = function() {};
+Java._types['net.minecraft.blockentity.BlockEntity'].prototype.getBlockState = function() {
+  return new (Java._types['net.minecraft.block.BlockState'])(new (Java._types['net.minecraft.block.Block'])('minecraft.air', 'Air'));
+};
+
 Java._types['net.minecraft.block.Block'] = function(tk, dn) { this._tk = tk; this._dn = dn; };
 Java._types['net.minecraft.block.Block'].prototype.getTranslationKey = function() { return this._tk; };
 Java._types['net.minecraft.block.Block'].prototype.getName = function() {
@@ -315,6 +354,7 @@ Java._types['net.minecraft.client.network.ClientPlayerEntity'] = function() {
   this.networkHandler = new (Java._types['net.minecraft.client.network.ClientPlayerEntity$NetworkHandler'])();
   this._inventory = new (Java._types['net.minecraft.entity.player.PlayerInventory'])();
   this._sprinting = false; this._sneaking = false;
+  this.currentScreenHandler = null;
 };
 Java._types['net.minecraft.client.network.ClientPlayerEntity'].prototype.jump = function() { _mockGameState.player.y += 1.25; };
 Java._types['net.minecraft.client.network.ClientPlayerEntity'].prototype.setSprinting = function(v) { this._sprinting = v; _mockGameState.player.sprinting = v; };
@@ -334,6 +374,9 @@ Java._types['net.minecraft.client.network.ClientPlayerEntity'].prototype.getYaw 
 Java._types['net.minecraft.client.network.ClientPlayerEntity'].prototype.getPitch = function() { return _mockGameState.player.pitch; };
 Java._types['net.minecraft.client.network.ClientPlayerEntity'].prototype.isOnGround = function() { return _mockGameState.player.onGround; };
 Java._types['net.minecraft.client.network.ClientPlayerEntity'].prototype.getInventory = function() { return this._inventory; };
+Java._types['net.minecraft.client.network.ClientPlayerEntity'].prototype.getEyeHeight = function(pose) { return 1.62; };
+Java._types['net.minecraft.client.network.ClientPlayerEntity'].prototype.getPose = function() { return 'STANDING'; };
+Java._types['net.minecraft.client.network.ClientPlayerEntity'].prototype.closeScreen = function() { this.currentScreenHandler = null; };
 
 // Packet types
 Java._types['net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket$PositionAndOnGround'] = function(x, y, z, g) {
@@ -359,15 +402,25 @@ Java._types['net.minecraft.world.World'].prototype.getBlockState = function(pos)
 };
 Java._types['net.minecraft.world.World'].prototype.getTimeOfDay = function() { return this._timeOfDay; };
 Java._types['net.minecraft.world.World'].prototype.getRegistryKey = function() { return this._regKey; };
+Java._types['net.minecraft.world.World'].prototype.getBlockEntity = function(pos) { return null; };
 
 var _lastInteractItem = null;
+var _lastInteractBlock = null;
+var _lastClickSlot = null;
 Java._types['net.minecraft.client.MinecraftClient$InteractionManager'] = function() {};
 Java._types['net.minecraft.client.MinecraftClient$InteractionManager'].prototype.interactItem = function(p, w, h) {
   _lastInteractItem = { player: p, world: w, hand: h };
 };
+Java._types['net.minecraft.client.MinecraftClient$InteractionManager'].prototype.interactBlock = function(p, w, h, hit) {
+  _lastInteractBlock = { player: p, world: w, hand: h, hit: hit };
+};
+Java._types['net.minecraft.client.MinecraftClient$InteractionManager'].prototype.clickSlot = function(syncId, slot, button, actionType, player) {
+  _lastClickSlot = { syncId: syncId, slot: slot, button: button, actionType: actionType, player: player };
+};
 
 Java._types['net.minecraft.client.MinecraftClient'] = function() {
   this.player = null; this.world = null; this.interactionManager = null;
+  this.options = { forwardKey: { _pressed: false, setPressed: function(v) { this._pressed = v; } } };
   this.runDirectory = { toPath: function() { return { resolve: function(p) { return { toString: function() { return '/mock-dir/' + p; }, toAbsolutePath: function() { return { toString: function() { return '/' + p; } }; }, getParent: function() { return { toString: function() { return '/config'; } }; } }; } }; } };
 };
 Java._types['net.minecraft.client.MinecraftClient'].prototype.execute = function(fn) { fn(); };
@@ -487,7 +540,13 @@ function resetGameState() {
   _mockGameState.player.sprinting = false; _mockGameState.player.sneaking = false;
   _mockGameState.player.lastSwingHand = null; _mockGameState.player.lastChatMessage = null;
   _mockGameState.player.raycastResult = null;
-  _lastInteractItem = null; _lastSentPacket = null; _sentPackets = [];
+  _lastInteractItem = null; _lastInteractBlock = null; _lastClickSlot = null;
+  _lastSentPacket = null; _sentPackets = [];
+  globalThis.__bridge._config.apiKey = '';
+  globalThis.__bridge._authMap.clear();
+  var C = Java._types['net.minecraft.client.MinecraftClient'].getInstance();
+  if (C.player) C.player.currentScreenHandler = null;
+  if (C.options) C.options.forwardKey._pressed = false;
 
   var inv = Java._types['net.minecraft.client.MinecraftClient'].getInstance().player.getInventory();
   for (var i = 0; i < 36; i++) inv.main.set(i, _createEmptyStack());
@@ -876,6 +935,127 @@ test('ERROR', 'Test missing type field returns error', function(c) {
   var r = simulateRaw(c, JSON.stringify({ id: 1, payload: {} }));
   assertEquals(r.type, 'error');
   assertEquals(r.error.code, -32602);
+});
+
+// --- SCANCONTAINER ---
+test('SCANCONTAINER', 'Test scanContainer with no block entity', function(c) {
+  var r = simulateCommand(c, 'scanContainer', { x: 0, y: 64, z: 0 });
+  assertEquals(r.result.success, false);
+  assertNotNull(r.result.error);
+});
+
+// --- SCREEN.GETSLOTS ---
+test('SCREEN', 'Test screen.getSlots with no screen open', function(c) {
+  var r = simulateCommand(c, 'screen.getSlots', {});
+  assertEquals(r.result.success, false);
+  assertEquals(r.result.error, 'No screen open');
+});
+
+test('SCREEN', 'Test screen.getSlots with screen open', function(c) {
+  var C = Java._types['net.minecraft.client.MinecraftClient'].getInstance();
+  var di = new Java._types['net.minecraft.item.Item']('block.minecraft.dirt', 'Dirt');
+  var pk = new Java._types['net.minecraft.item.Item']('item.minecraft.stone_pickaxe', 'Stone Pickaxe');
+  var stacks = [
+    new Java._types['net.minecraft.item.ItemStack'](di, 16),
+    _createEmptyStack(),
+    new Java._types['net.minecraft.item.ItemStack'](pk, 1)
+  ];
+  C.player.currentScreenHandler = new MockScreenHandler('Chest', stacks);
+  var r = simulateCommand(c, 'screen.getSlots', {});
+  assertEquals(r.result.success, true);
+  assertEquals(r.result.title, 'Chest');
+  assertEquals(r.result.slots.length, 2);
+  assertEquals(r.result.slots[0].itemId, 'block.minecraft.dirt');
+  assertEquals(r.result.slots[0].count, 16);
+  assertEquals(r.result.slots[1].itemId, 'item.minecraft.stone_pickaxe');
+  assertEquals(r.result.slots[1].count, 1);
+});
+
+// --- SCREEN.CLICK ---
+test('SCREEN', 'Test screen.click with no screen open', function(c) {
+  var r = simulateCommand(c, 'screen.click', { slot: 0 });
+  assertEquals(r.result.success, false);
+  assertEquals(r.result.error, 'No screen open');
+});
+
+test('SCREEN', 'Test screen.click with screen open', function(c) {
+  var C = Java._types['net.minecraft.client.MinecraftClient'].getInstance();
+  C.player.currentScreenHandler = new MockScreenHandler('Chest', [_createEmptyStack()]);
+  var r = simulateCommand(c, 'screen.click', { slot: 0, button: 0, actionType: 'PICKUP' });
+  assertEquals(r.result.success, true);
+  assertNotNull(_lastClickSlot);
+  assertEquals(_lastClickSlot.slot, 0);
+  assertEquals(_lastClickSlot.button, 0);
+});
+
+test('SCREEN', 'Test screen.click invalid slot', function(c) {
+  var r = simulateCommand(c, 'screen.click', { slot: 'abc' });
+  assertEquals(r.result.success, false);
+});
+
+// --- SCREEN.CLOSE ---
+test('SCREEN', 'Test screen.close', function(c) {
+  var C = Java._types['net.minecraft.client.MinecraftClient'].getInstance();
+  C.player.currentScreenHandler = new MockScreenHandler('Chest', []);
+  var r = simulateCommand(c, 'screen.close', {});
+  assertEquals(r.result.success, true);
+  assertEquals(C.player.currentScreenHandler, null);
+});
+
+// --- BLOCK.ACTIVATE ---
+test('BLOCK', 'Test block.activate', function(c) {
+  var r = simulateCommand(c, 'block.activate', { x: 0, y: 63, z: 0 });
+  assertEquals(r.result.success, true);
+  assertNotNull(_lastInteractBlock);
+  assertEquals(_lastInteractBlock.hand, 'MAIN_HAND');
+});
+
+// --- PLAYER.LOOKAT ---
+test('PLAYER', 'Test player.lookAt', function(c) {
+  _mockGameState.player.x = 0; _mockGameState.player.y = 64; _mockGameState.player.z = 0;
+  var r = simulateCommand(c, 'player.lookAt', { x: 10, y: 64, z: 0 });
+  assertEquals(r.result.success, true);
+  assertNotNull(r.result.yaw);
+  assertNotNull(r.result.pitch);
+  assertEquals(_sentPackets.length, 1);
+});
+
+// --- PLAYER.WALKTO ---
+test('PLAYER', 'Test player.walkTo sets walkTarget', function(c) {
+  var r = simulateCommand(c, 'player.walkTo', { x: 10, y: 64, z: 10 });
+  assertEquals(r.result.success, true);
+  assertEquals(r.result.message, 'Walking to target');
+});
+
+// --- _processWalk tests ---
+test('WALK', 'Test _processWalk sends packet and presses key', function(c) {
+  _mockGameState.player.x = 0; _mockGameState.player.y = 64; _mockGameState.player.z = 0;
+  simulateCommand(c, 'player.walkTo', { x: 10, y: 64, z: 10 });
+  _sentPackets = [];
+  globalThis.__bridge._eventTick();
+  assert(_sentPackets.length > 0, 'Should have sent look packet');
+  var C = Java._types['net.minecraft.client.MinecraftClient'].getInstance();
+  assertEquals(C.options.forwardKey._pressed, true);
+});
+
+test('WALK', 'Test _processWalk stops when close', function(c) {
+  _mockGameState.player.x = 10.1; _mockGameState.player.y = 64; _mockGameState.player.z = 10.1;
+  simulateCommand(c, 'player.walkTo', { x: 10, y: 64, z: 10 });
+  _sentPackets = [];
+  globalThis.__bridge._eventTick();
+  var C = Java._types['net.minecraft.client.MinecraftClient'].getInstance();
+  assertEquals(C.options.forwardKey._pressed, false);
+});
+
+// --- stopBridge releases forward key ---
+test('WALK', 'Test stopBridge releases forward key', function(c) {
+  _mockGameState.player.x = 0; _mockGameState.player.y = 64; _mockGameState.player.z = 0;
+  simulateCommand(c, 'player.walkTo', { x: 100, y: 64, z: 100 });
+  globalThis.__bridge._eventTick();
+  var C = Java._types['net.minecraft.client.MinecraftClient'].getInstance();
+  assertEquals(C.options.forwardKey._pressed, true);
+  globalThis.__bridge.stop();
+  assertEquals(C.options.forwardKey._pressed, false);
 });
 
 // =============================================================================

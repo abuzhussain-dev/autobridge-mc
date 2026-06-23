@@ -1,0 +1,28 @@
+{
+  "name": "autobridge",
+  "version": "1.0.0",
+  "description": "Connect external AI agents to Minecraft via WebSocket using JsMacrosCE.",
+  "main": "autobridge.js",
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abuzhussain-dev/autobridge-mc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/abuzhussain-dev/autobridge-mc/issues"
+  },
+  "homepage": "https://github.com/abuzhussain-dev/autobridge-mc#readme",
+  "dependencies": {
+    "minecraft-data": "^3.111.0"
+  }
+}

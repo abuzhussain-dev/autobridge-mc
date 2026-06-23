@@ -17,6 +17,10 @@ var Paths = Java.type('java.nio.file.Paths');
 var Files = Java.type('java.nio.file.Files');
 var StandardCharsets = Java.type('java.nio.charset.StandardCharsets');
 var Client = Java.type('net.minecraft.client.MinecraftClient').getInstance();
+var BlockPos = Java.type('net.minecraft.util.math.BlockPos');
+var Hand = Java.type('net.minecraft.util.Hand');
+var LookPacket = Java.type('net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket$LookAndOnGround');
+var SlotActionType = Java.type('net.minecraft.screen.slot.SlotActionType');
 
 var _cmdQueue = [];
 var _cmdQueueRunning = false;
@@ -70,6 +74,7 @@ var _eventSubscriptions = new ConcurrentHashMap();
 var _eventInterval = null;
 var _startTime = null;
 var _lastChat = [];
+var _walkTarget = null;
 
 var WS_MAGIC = '258EAFA5-E914-47DA-95CA-5AB5DC11B75B';
 var MAX_CONNECTIONS = 10;
@@ -398,10 +403,15 @@ Object.defineProperty(globalThis.__bridge.ws, 'onDisconnect', {
 
 globalThis.__bridge.commands = {
   handlers: {},
-  register: function(handlers) {
+  register: function(handlers, prefix) {
     for (var type in handlers) {
       if (handlers.hasOwnProperty(type)) {
-        this.handlers[type] = handlers[type];
+        var key = prefix ? prefix + '.' + type : type;
+        if (typeof handlers[type] === 'function') {
+          this.handlers[key] = handlers[type];
+        } else {
+          this.register(handlers[type], key);
+        }
       }
     }
   },
@@ -430,8 +440,8 @@ globalThis.__bridge.commands.register({
       if (typeof payload.x !== 'number' || typeof payload.y !== 'number' || typeof payload.z !== 'number') {
         return { success: false, error: "Invalid move payload: x, y, z must be numbers" };
       }
-      var Packet = Java.type('net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket$PositionAndOnGround');
-      Client.player.networkHandler.sendPacket(new Packet(payload.x, payload.y, payload.z, true));
+      var PosPacket = Java.type('net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket$PositionAndOnGround');
+      Client.player.networkHandler.sendPacket(new PosPacket(payload.x, payload.y, payload.z, true));
       return { success: true };
     } catch (e) {
       return { success: false, error: e.message };
@@ -444,8 +454,7 @@ globalThis.__bridge.commands.register({
       if (typeof payload.yaw !== 'number' || typeof payload.pitch !== 'number') {
         return { success: false, error: "Invalid look payload: yaw and pitch must be numbers" };
       }
-      var Packet = Java.type('net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket$LookAndOnGround');
-      Client.player.networkHandler.sendPacket(new Packet(payload.yaw, payload.pitch, true));
+      Client.player.networkHandler.sendPacket(new LookPacket(payload.yaw, payload.pitch, true));
       return { success: true };
     } catch (e) {
       return { success: false, error: e.message };
@@ -662,6 +671,126 @@ globalThis.__bridge.commands.register({
     }
   },
 
+  scanContainer: function(payload) {
+    try {
+      _check();
+      var x = Math.floor(payload.x);
+      var y = Math.floor(payload.y);
+      var z = Math.floor(payload.z);
+      var blockPos = new BlockPos(x, y, z);
+      var entity = Client.world.getBlockEntity(blockPos);
+      if (!entity) return { success: false, error: "No block entity at position" };
+      var Inventory = Java.type('net.minecraft.inventory.Inventory');
+      if (!(entity instanceof Inventory)) return { success: false, error: "Block entity is not an inventory" };
+      var slots = [];
+      for (var i = 0; i < entity.size(); i++) {
+        var stack = entity.getStack(i);
+        if (!stack.isEmpty()) {
+          slots.push({ slot: i, itemId: stack.getItem().getTranslationKey(), count: stack.getCount(), name: stack.getName().getString() });
+        }
+      }
+      return { success: true, containerType: entity.getBlockState().getBlock().getTranslationKey(), slots: slots };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  },
+
+  screen: {
+    getSlots: function(payload) {
+      try {
+        _check();
+        var screenHandler = Client.player.currentScreenHandler;
+        if (!screenHandler) return { success: false, error: "No screen open" };
+        var title = screenHandler.getTitle().getString();
+        var slots = [];
+        var slotList = screenHandler.slots;
+        for (var i = 0; i < slotList.size(); i++) {
+          var slot = slotList.get(i);
+          var stack = slot.getStack();
+          if (!stack.isEmpty()) {
+            slots.push({ slot: i, itemId: stack.getItem().getTranslationKey(), count: stack.getCount(), name: stack.getName().getString() });
+          }
+        }
+        return { success: true, title: title, slots: slots };
+      } catch (e) {
+        return { success: false, error: e.message };
+      }
+    },
+
+    click: function(payload) {
+      try {
+        _check();
+        if (typeof payload.slot !== 'number') return { success: false, error: "Invalid slot number" };
+        var screenHandler = Client.player.currentScreenHandler;
+        if (!screenHandler) return { success: false, error: "No screen open" };
+        var button = typeof payload.button === 'number' ? payload.button : 0;
+        var actionType = SlotActionType.valueOf(payload.actionType || 'PICKUP');
+        Client.interactionManager.clickSlot(screenHandler.syncId, payload.slot, button, actionType, Client.player);
+        return { success: true };
+      } catch (e) {
+        return { success: false, error: e.message };
+      }
+    },
+
+    close: function(payload) {
+      try {
+        _check();
+        Client.player.closeScreen();
+        return { success: true };
+      } catch (e) {
+        return { success: false, error: e.message };
+      }
+    }
+  },
+
+  block: {
+    activate: function(payload) {
+      try {
+        _check();
+        var blockPos = new BlockPos(Math.floor(payload.x), Math.floor(payload.y), Math.floor(payload.z));
+        var HitResult = Java.type('net.minecraft.util.hit.BlockHitResult');
+        var Vec3d = Java.type('net.minecraft.util.math.Vec3d');
+        var hitResult = new HitResult(new Vec3d(payload.x + 0.5, payload.y + 1.0, payload.z + 0.5));
+        Client.interactionManager.interactBlock(Client.player, Client.world, Hand.MAIN_HAND, hitResult);
+        return { success: true };
+      } catch (e) {
+        return { success: false, error: e.message };
+      }
+    }
+  },
+
+  player: {
+    lookAt: function(payload) {
+      try {
+        _check();
+        var pos = Client.player.getPos();
+        var eyeHeight = Client.player.getEyeHeight(Client.player.getPose());
+        var dx = payload.x - pos.x;
+        var dy = (payload.y + 1) - (pos.y + eyeHeight);
+        var dz = payload.z - pos.z;
+        var yaw = Math.atan2(dz, dx) * 180 / Math.PI - 90;
+        if (yaw < -180) yaw += 360;
+        if (yaw > 180) yaw -= 360;
+        var pitch = -Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
+        pitch = Math.max(-90, Math.min(90, pitch));
+        Client.player.networkHandler.sendPacket(new LookPacket(yaw, pitch, Client.player.isOnGround()));
+        return { success: true, yaw: yaw, pitch: pitch };
+      } catch (e) {
+        return { success: false, error: e.message };
+      }
+    },
+
+    walkTo: function(payload) {
+      try {
+        _check();
+        _walkTarget = { x: Math.floor(payload.x) + 0.5, y: payload.y, z: Math.floor(payload.z) + 0.5 };
+        return { success: true, message: "Walking to target" };
+      } catch (e) {
+        return { success: false, error: e.message };
+      }
+    }
+  },
+
   getTime: function(payload) {
     try {
       _check();
@@ -841,6 +970,7 @@ function _eventTick() {
     if (!Client.player || !Client.world) return;
     _checkPosition();
     _checkDeath();
+    if (_walkTarget !== null) { _processWalk(); }
     _checkHealth();
   } catch (e) {
   }
@@ -861,7 +991,7 @@ function _checkPosition() {
     if (_lastPos === null || x !== _lastPos.x || y !== _lastPos.y || z !== _lastPos.z || yaw !== _lastPos.yaw || pitch !== _lastPos.pitch || onGround !== _lastPos.onGround || dimension !== _lastPos.dimension) {
       _lastPos = {x: x, y: y, z: z, yaw: yaw, pitch: pitch, onGround: onGround, dimension: dimension};
       _lastPosBroadcast = now;
-      globalThis.__bridge.ws.broadcast('event', {event: 'position', data: {x: x, y: y, z: z, yaw: yaw, pitch: pitch, onGround: onGround, dimension: dimension}});
+      globalThis.__bridge.ws.broadcast('event', {event: 'position', data: {x: x, y: y, z: z, yaw: yaw, pitch: pitch, onGround: onGround, dimension: dimension, walking: _walkTarget !== null}});
     }
   } catch (e) {
   }
@@ -878,6 +1008,37 @@ function _checkHealth() {
       globalThis.__bridge.ws.broadcast('event', {event: 'health', data: {health: health, maxHealth: maxHealth, food: food, saturation: saturation}});
     }
   } catch (e) {
+  }
+}
+
+function _processWalk() {
+  try {
+    var pos = Client.player.getPos();
+    var dx = _walkTarget.x - pos.x;
+    var dz = _walkTarget.z - pos.z;
+    var dist = Math.sqrt(dx * dx + dz * dz);
+    if (dist < 5.0) {
+      var targetBlock = new BlockPos(Math.floor(_walkTarget.x), Math.floor(_walkTarget.y - 1), Math.floor(_walkTarget.z));
+      if (Client.world.getBlockState(targetBlock).isAir()) {
+        _walkTarget = null;
+        Client.options.forwardKey.setPressed(false);
+        return;
+      }
+    }
+    if (dist < 1.0) {
+      _walkTarget = null;
+      Client.options.forwardKey.setPressed(false);
+      return;
+    }
+    var yaw = Math.atan2(dz, dx) * 180 / Math.PI - 90;
+    Client.player.networkHandler.sendPacket(new LookPacket(yaw, Client.player.getPitch(), true));
+    if (Client.player.isOnGround()) {
+      Client.player.jump();
+    }
+    Client.options.forwardKey.setPressed(true);
+  } catch (e) {
+    _walkTarget = null;
+    Client.options.forwardKey.setPressed(false);
   }
 }
 
@@ -932,6 +1093,8 @@ function startBridge() {
 
 function stopBridge() {
   try {
+    _walkTarget = null;
+    Client.options.forwardKey.setPressed(false);
     if (_eventInterval !== null) {
       clearInterval(_eventInterval);
       _eventInterval = null;
@@ -948,6 +1111,8 @@ globalThis.__bridge.start = startBridge;
 globalThis.__bridge.stop = stopBridge;
 globalThis.__bridge._config = _config;
 globalThis.__bridge._authMap = _authMap;
+globalThis.__bridge._eventTick = _eventTick;
+globalThis.__bridge._processWalk = _processWalk;
 
 try {
   startBridge();
